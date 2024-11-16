@@ -2,6 +2,8 @@ from math import isclose
 from ff import S256FiniteElement
 from constants import SECP256K1_A, SECP256K1_B, EC_ORDER, Gx, Gy
 from ecds import Signature
+from hashlib import sha256
+import hmac
 
 # elliptic curve point defintion
 
@@ -152,6 +154,56 @@ class S256Point(Point):
         return total.x.element == sig.r_x
 
 
+class SecretKey:
+
+    def __init__(self, sk):
+        self.sk = sk
+        self.pk = sk * S256Point(Gx, Gy)
+
+    def hex(self):
+        return f"{self.sk:x}".zfill(64)
+
+    def deterministic_k(self, z):
+        key = b"\x00" * 32
+        val = b"\x01" * 32
+
+        if z > EC_ORDER:
+            z -= EC_ORDER
+        z_bytes = z.to_bytes(32, "big")
+        sk_bytes = self.sk.to_bytes(32, "big")
+
+        key = hmac.new(key, val + b"\x00" + sk_bytes + z_bytes, sha256).digest()
+        val = hmac.new(key, val, sha256).digest()
+        key = hmac.new(key, val + b"\x01" + sk_bytes + z_bytes, sha256)
+        val = hmac.new(key, val, sha256).digest()
+
+        while True:
+            val = hmac.new(key, val, sha256).digest()
+            possible_k = int.from_bytes(val, "big")
+            if possible_k >= 1 and possible_k < EC_ORDER:
+                return possible_k
+            key = hmac.new(key, val + b"\x00", sha256).digest()
+            val = hmac.new(key, val, sha256).digest()
+
+    def sign(self, z):
+        # need to choose a unique k for each signature otherwise exposing our sk implicitly
+
+        k = self.deterministic_k(z)
+        r_x = (k * S256Point(Gx, Gy)).x.element
+        k_inv = pow(k, EC_ORDER - 2, EC_ORDER)
+        sig_val = (z + r_x * self.sk) * k_inv % EC_ORDER
+        # choosing shortest signature given modulo EC_ORDER
+        if sig_val > EC_ORDER / 2:
+            sig_val = EC_ORDER - sig_val
+
+        return Signature(r_x, sig_val)
+
+
+def twice_hash256(s):
+
+    return sha256(sha256(s).digest()).digest()
+
+
 if __name__ == "__main__":
 
     # test cases
@@ -210,6 +262,33 @@ if __name__ == "__main__":
     r_x = 0xAC8D1C87E51D0D441BE8B3DD5B05C8795B48875DFFE00B7FFCFAC23010D3A395
     sig_value = 0x68342CEFF8935EDEDD102DD876FFD6BA72D6A427A3EDB13D26EB0781CB423C4
     sig = Signature(r_x, sig_value)
-    pub_key = S256Point(x, y)
+    PK = S256Point(x, y)
 
-    print(pub_key.verify(hashed_document, sig))
+    print(
+        f"Does the signature correspond to the hashed doccument being signed?",
+        PK.verify(hashed_document, sig),
+    )
+
+    print("Generating a signature")
+
+    sk = int.from_bytes(twice_hash256(b"This is a test"), "big")
+    hashed_document = int.from_bytes(twice_hash256(b"document being signed"), "big")
+    # random k
+    k = 24544566675677
+
+    SK = SecretKey(sk)
+
+    r_x = (k * S256Point(Gx, Gy)).x.element
+    k_inv = pow(k, EC_ORDER - 2, EC_ORDER)
+    sig_val = (hashed_document + r_x * SK.sk) * k_inv % EC_ORDER
+
+    PK = SK.sk * S256Point(Gx, Gy)
+
+    print("Public key/point:", PK)
+    print("Hex of hashed document:", hex(hashed_document))
+    print("Hex of x coord of random point:", hex(r_x))
+    print("Signature value:", hex(sig_val))
+    print(
+        "Does the signature verfiy?:",
+        PK.verify(hashed_document, Signature(r_x, sig_val)),
+    )

@@ -1,7 +1,8 @@
 from math import isclose
-from ff import S256FiniteElement
-from constants import SECP256K1_A, SECP256K1_B, EC_ORDER, Gx, Gy
-from ecds import Signature
+from .ff import S256FiniteElement
+from .constants import SECP256K1_A, SECP256K1_B, EC_ORDER, BTC_FF_ORDER, Gx, Gy
+from .ecds import Signature
+from .utils import hash256,hash160, encode_base58_checksum
 from hashlib import sha256
 import hmac
 
@@ -124,15 +125,41 @@ class Point:
             v >>= 1
         return result
 
-    def sign(self, hashed_doc):
-        pass
+    # def sign(self, hashed_doc):
+    #     pass
 
-    def verify(self, signature, r_x):
-        pass
+    # def verify(self, signature, r_x):
+    #     pass
 
 
 class S256Point(Point):
 
+
+    @classmethod 
+    def parse(self, sec_binary):
+        if sec_binary[0] == 4: 
+            x  = int.from_bytes(sec_binary[1:33], "big")
+            y  = int.from_bytes(sec_binary[33:65], "big")
+            return self.__class__(x=x, y=y)
+
+        is_even = sec_binary[0] == 2
+        x = S256FiniteElement(int.from_bytes(sec_binary[1:], 'big'))
+        # right side of y^2 = x^3 + 7 
+        y2 = x**3 + S256FiniteElement(SECP256K1_B)
+        
+        y = y2.sqrt()
+        if y.element % 2 == 0:
+            even_y = y
+            odd_y = S256FiniteElement(BTC_FF_ORDER - y.element)
+        else:
+            even_y = S256FiniteElement(BTC_FF_ORDER - y.element)
+            odd_y = y
+        if is_even:
+            return self.__class__(x, even_y)
+        else:
+            return self.__class__(x, odd_y)            
+        
+    
     def __init__(self, x, y, a=None, b=None):
         a = S256FiniteElement(SECP256K1_A)
         b = S256FiniteElement(SECP256K1_B)
@@ -152,8 +179,36 @@ class S256Point(Point):
         v = (sig.r_x * s_inv) % EC_ORDER
         total = u * self.__class__(Gx, Gy) + v * self
         return total.x.element == sig.r_x
+    
+    def hash160(self, compressed=True):
+        return hash160(self.sec(compressed))
+    
+    def address(self, compressed=True, testnet=True):
+        h160 = self.hash160(compressed)
+        if testnet:
+            prefix = b'\6f'
+        else:
+            prefix = b'\00'
+        return encode_base58_checksum(prefix + h160)
+        
+        
+    
+    
+    def sec(self, compressed=True):
+        ''' Standardards for efficient cryptography'''
+        if not compressed:
+            return b'\x04' + self.x.element.to_bytes(32, 'big') + self.y.element.to_bytes(32, 'big')
+        
+        if compressed:
+            if self.y.element % 2 == 0:  # even y element,  
+                return b'\x02' + self.x.element.to_bytes(32, 'big')
+            else:
+                return b'\x03' + self.x.element.to_bytes(32, 'big')
+    
+    
 
-
+    
+    
 class SecretKey:
 
     def __init__(self, sk):
@@ -198,10 +253,18 @@ class SecretKey:
 
         return Signature(r_x, sig_val)
 
+    def wif(self, compressed=True, testnet=False):
+        secret_bytes = self.sk.to_bytes(32, 'big')
+        if testnet:
+            prefix = b'\xef'
+        else:
+            prefix = b'\x80'
+        if compressed:
+            sufix = b'\x01'
+        else: 
+            sufix = b''
+        return encode_base58_checksum(prefix + secret_bytes + sufix)        
 
-def twice_hash256(s):
-
-    return sha256(sha256(s).digest()).digest()
 
 
 if __name__ == "__main__":
@@ -271,8 +334,8 @@ if __name__ == "__main__":
 
     print("Generating a signature")
 
-    sk = int.from_bytes(twice_hash256(b"This is a test"), "big")
-    hashed_document = int.from_bytes(twice_hash256(b"document being signed"), "big")
+    sk = int.from_bytes(hash256(b"This is a test"), "big")
+    hashed_document = int.from_bytes(hash256(b"document being signed"), "big")
     # random k
     k = 24544566675677
 

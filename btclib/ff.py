@@ -17,7 +17,7 @@
 
 # a * b^(-1) * 1  mod (order) => a * b^(-1) * b^(order-1)  mod (order) => a * b^(order - 2) mod(order)  is equivalent to a/b mod (order)
 
-from constants import BTC_FF_ORDER
+from .constants import BTC_FF_ORDER
 
 class FiniteElement:
 	def __init__(self,element,order):
@@ -91,7 +91,9 @@ class FiniteElement:
 			
 		new_element = self.element * pow(other.element, self.order - 2, self.order) % self.order
 		return self.__class__(new_element, self.order)	
-		
+
+
+	
 class S256FiniteElement(FiniteElement):
 		
 		def __init__(self,element,order=None):
@@ -100,6 +102,11 @@ class S256FiniteElement(FiniteElement):
 		
 		def __repr__(self):
 			return f'{self.element:x}'.zfill(64)
+
+		def sqrt(self):
+			return self **( (BTC_FF_ORDER + 1 ) // 4 )
+
+
 
 		
 if __name__ == '__main__':

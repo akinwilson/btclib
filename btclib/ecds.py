@@ -1,5 +1,5 @@
 # elliptic curve signature algorithm
-
+import hashlib
 # want to 'sign' a 'document' s.t. it can be verified that the signature produced for document could only have been created by someone who knows the private/secret key, x, corresponding to a public key, y, where y is visible to all. 
 
  #  let g be the generator point 
@@ -68,4 +68,24 @@ class Signature:
 		self.value = value
 	def __repr__(self):
 		return f'Signature({self.r_x},{self.value})'
+
+	def der(self):
+		rxbin = self.r_x.to_bytes(32, 'big')
+		# removing all null bytes
+		rxbin = rxbin.lstrip(b"\x00")
+		# if rxbin has high bit add \x00
+		if rxbin[0] & 0x80:
+			rxbin = b'\00' + rxbin
+		result = bytes([2, len(rxbin)]) + rxbin
+		sigbin = self.value.to_bytes(32, 'big')
+		sigbin = sigbin.lstrip(b"\x00")
+		if sigbin[0] & 0x80:
+			sigbin = b'\x00' + sigbin
+		result += bytes([2, len(sigbin)]) + sigbin
+
+		return bytes([0x30, len(result)]) + result 
+
+
+
+
 

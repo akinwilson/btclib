@@ -49,5 +49,7 @@ OP_CODES_FUNCS = {
         170: op_hash256,
         0xa9: op_hash160,
         0xac: op_checksig, 
-
         }
+
+
+

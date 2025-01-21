@@ -11,7 +11,18 @@ Note: this implementation has not been optimised for speed. Anywhere that requir
 See True random number generators for more information on the subject.
 ## Usage 
 
+
+
 ## Running tests 
+To run tests locally, install the developer requirements
+```
+pip install -r requirements.dev.txt
+```
+then, with
+```
+python -m pytest
+```
+you can run the tests locally.
 
 ## Further improvements 
 

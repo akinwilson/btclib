@@ -2,6 +2,8 @@ from btclib.utils import hash256
 import requests
 from io import BytesIO
 
+from .script import Script 
+
 
 class TxFetcher:
     cache = {}

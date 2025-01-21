@@ -267,7 +267,7 @@ class SecretKey:
 
 
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
     # # test cases
     # fmt = 50

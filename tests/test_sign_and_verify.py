@@ -1,3 +1,0 @@
-from btclib.
-
-import pytest

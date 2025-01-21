@@ -1,19 +1,21 @@
 '''
 
-Coding operations codes; opcodes, and operations  
+Coding operations codes; opcodes, and operations.
+
+let x = [1,2,3,5,6] be considered a stack then 
+
+the TOP of the stack is the right-hand-side, the last, element in the list 6
+and BOTTOM of the stack is the left-most-side, the first, element in the list 1
+
 '''
 from .utils import hash256, hash160
-
-
-
-import
 
 def op_dup(s):
     '''
     duplicate last element on stack 
     '''
     if len(s) < 1:
-        rturn False 
+        return False 
     s.append(s[-1])
     return True 
 
@@ -22,15 +24,15 @@ def op_hash256(s):
     '''
     generates hash256 on element
     '''
-    if len(stack) < 1:
-        rturn False 
+    if len(s) < 1:
+        return False 
     el = s.pop() # last element in list 
     s.append(hash256(el))
     return True 
     
-def op_hash160(s)
+def op_hash160(s):
     if  len(s) < 1:
-        rturn False 
+        return False 
     el = s.pop()
     s.append(hash160(el))
 

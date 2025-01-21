@@ -2,7 +2,7 @@ from math import isclose
 from .ff import S256FiniteElement
 from .constants import SECP256K1_A, SECP256K1_B, EC_ORDER, BTC_FF_ORDER, Gx, Gy
 from .ecds import Signature
-from .utils import hash256,hash160, encode_base58_checksum
+from .utils import hash160, encode_base58_checksum
 from hashlib import sha256
 import hmac
 
@@ -297,23 +297,23 @@ if __name__ == "__main__":
 
     # print('#'*fmt,'subtraction', '#'*fmt)
     # print( f'{p2}-{p2}={p2-p2}')
-    print("multiplication".center(fmt, sym))
-    coefs = [1, 100, 100000]
+    # print("multiplication".center(fmt, sym))
+    # coefs = [1, 100, 100000]
 
-    for coef in coefs:
-        print(f"{coef}*{p1}={coef*p1}")
+    # for coef in coefs:
+    #     print(f"{coef}*{p1}={coef*p1}")
 
-    print("multiplication secp256k1 point".center(fmt, sym))
-    s256p = S256Point(Gx, Gy)
-    print(s256p)
-    print(
-        f"There are roughly {EC_ORDER:.1E} unique public points on the secp256k1 curve for the given generator point"
-    )
-    print(
-        "do we return to zero-like point on secp256k1 curve?",
-        EC_ORDER * s256p == S256Point(None, None),
-    )
-    print(EC_ORDER * s256p)
+    # print("multiplication secp256k1 point".center(fmt, sym))
+    # s256p = S256Point(Gx, Gy)
+    # print(s256p)
+    # print(
+    #     f"There are roughly {EC_ORDER:.1E} unique public points on the secp256k1 curve for the given generator point"
+    # )
+    # print(
+    #     "do we return to zero-like point on secp256k1 curve?",
+    #     EC_ORDER * s256p == S256Point(None, None),
+    # )
+    # print(EC_ORDER * s256p)
 
 
     # special case for y = 0 coordinate -> x axis intersection point

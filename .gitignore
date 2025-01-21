@@ -1,3 +1,4 @@
 Pipfile
+/notebooks
 .vscode
 */__pycache__/*

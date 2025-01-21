@@ -4,3 +4,4 @@ Pipfile
 */__pycache__/*
 **/btclib.egg-info/*
 .coverage
+/.pytest_cache

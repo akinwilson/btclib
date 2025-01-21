@@ -69,6 +69,11 @@ class Signature:
 	def __repr__(self):
 		return f'Signature({self.r_x},{self.value})'
 
+
+	def __format__(self, x):
+		return f'Signature({self.r_x:x},{self.value:x})'
+		 
+		
 	def der(self):
 		rxbin = self.r_x.to_bytes(32, 'big')
 		# removing all null bytes

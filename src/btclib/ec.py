@@ -314,44 +314,46 @@ if __name__ == "__main__":
         EC_ORDER * s256p == S256Point(None, None),
     )
     print(EC_ORDER * s256p)
+
+    
     # special case for y = 0 coordinate -> x axis intersection point
     # TO DO: find x coordinate of intersection point
     # test addition of point(x,0,5,7) should be infinity
 
-    print("Testing signature verification")
-    x = 0x887387E452B8EACC4ACFDE10D9AAF7F6D9A0F975AABB10D006E4DA568744D06C
-    y = 0x61DE6D95231CD89026E286DF3B6AE4A894A3378E393E93A0F45B666329A0AE34
-    hashed_document = 0xEC208BAA0FC1C19F708A9CA96FDEFF3AC3F230BB4A7BA4AEDE4942AD003C0F60
-    r_x = 0xAC8D1C87E51D0D441BE8B3DD5B05C8795B48875DFFE00B7FFCFAC23010D3A395
-    sig_value = 0x68342CEFF8935EDEDD102DD876FFD6BA72D6A427A3EDB13D26EB0781CB423C4
-    sig = Signature(r_x, sig_value)
-    PK = S256Point(x, y)
+    # print("Testing signature verification")
+    # x = 0x887387E452B8EACC4ACFDE10D9AAF7F6D9A0F975AABB10D006E4DA568744D06C
+    # y = 0x61DE6D95231CD89026E286DF3B6AE4A894A3378E393E93A0F45B666329A0AE34
+    # hashed_document = 0xEC208BAA0FC1C19F708A9CA96FDEFF3AC3F230BB4A7BA4AEDE4942AD003C0F60
+    # r_x = 0xAC8D1C87E51D0D441BE8B3DD5B05C8795B48875DFFE00B7FFCFAC23010D3A395
+    # sig_value = 0x68342CEFF8935EDEDD102DD876FFD6BA72D6A427A3EDB13D26EB0781CB423C4
+    # sig = Signature(r_x, sig_value)
+    # PK = S256Point(x, y)
 
-    print(
-        f"Does the signature correspond to the hashed doccument being signed?",
-        PK.verify(hashed_document, sig),
-    )
+    # print(
+    #     f"Does the signature correspond to the hashed doccument being signed?",
+    #     PK.verify(hashed_document, sig),
+    # )
 
-    print("Generating a signature")
+    # print("Generating a signature")
 
-    sk = int.from_bytes(hash256(b"This is a test"), "big")
-    hashed_document = int.from_bytes(hash256(b"document being signed"), "big")
-    # random k
-    k = 24544566675677
+    # sk = int.from_bytes(hash256(b"This is a test"), "big")
+    # hashed_document = int.from_bytes(hash256(b"document being signed"), "big")
+    # # random k
+    # k = 24544566675677
 
-    SK = SecretKey(sk)
+    # SK = SecretKey(sk)
 
-    r_x = (k * S256Point(Gx, Gy)).x.element
-    k_inv = pow(k, EC_ORDER - 2, EC_ORDER)
-    sig_val = (hashed_document + r_x * SK.sk) * k_inv % EC_ORDER
+    # r_x = (k * S256Point(Gx, Gy)).x.element
+    # k_inv = pow(k, EC_ORDER - 2, EC_ORDER)
+    # sig_val = (hashed_document + r_x * SK.sk) * k_inv % EC_ORDER
 
-    PK = SK.sk * S256Point(Gx, Gy)
+    # PK = SK.sk * S256Point(Gx, Gy)
 
-    print("Public key/point:", PK)
-    print("Hex of hashed document:", hex(hashed_document))
-    print("Hex of x coord of random point:", hex(r_x))
-    print("Signature value:", hex(sig_val))
-    print(
-        "Does the signature verfiy?:",
-        PK.verify(hashed_document, Signature(r_x, sig_val)),
-    )
+    # print("Public key/point:", PK)
+    # print("Hex of hashed document:", hex(hashed_document))
+    # print("Hex of x coord of random point:", hex(r_x))
+    # print("Signature value:", hex(sig_val))
+    # print(
+    #     "Does the signature verfiy?:",
+    #     PK.verify(hashed_document, Signature(r_x, sig_val)),
+    # )

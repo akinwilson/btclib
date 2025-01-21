@@ -269,24 +269,24 @@ class SecretKey:
 
 if __name__ == "__main__":
 
-    # test cases
-    fmt = 50
-    sym = "#"
-    print("represent point".center(fmt, sym))
-    p1 = Point(18, 77, 5, 7)
-    print(p1)
-    p2 = Point(-1, -1, 5, 7)
-    print(p2)
-    print("comparison".center(fmt, sym))
-    print(f"are {p1} and {p1} the same?", p1 == p1)
-    print(f"are {p1} and {p2} the same?", p1 == p2)
+    # # test cases
+    # fmt = 50
+    # sym = "#"
+    # print("represent point".center(fmt, sym))
+    # p1 = Point(18, 77, 5, 7)
+    # print(p1)
+    # p2 = Point(-1, -1, 5, 7)
+    # print(p2)
+    # print("comparison".center(fmt, sym))
+    # print(f"are {p1} and {p1} the same?", p1 == p1)
+    # print(f"are {p1} and {p2} the same?", p1 == p2)
 
-    p_inf = Point(None, None, 5, 7)
+    # p_inf = Point(None, None, 5, 7)
 
-    print("addition".center(fmt, sym))
-    print(f"{p1}+{p_inf}={p1+ p_inf}")
-    print(f"{p1}+{p2}={p1+p2}")
-    print(f"{p2}+{p2}={p2+p2}")
+    # print("addition".center(fmt, sym))
+    # print(f"{p1}+{p_inf}={p1+ p_inf}")
+    # print(f"{p1}+{p2}={p1+p2}")
+    # print(f"{p2}+{p2}={p2+p2}")
 
     # NOTICE: we have defined
     # P = I + P
@@ -315,7 +315,7 @@ if __name__ == "__main__":
     )
     print(EC_ORDER * s256p)
 
-    
+
     # special case for y = 0 coordinate -> x axis intersection point
     # TO DO: find x coordinate of intersection point
     # test addition of point(x,0,5,7) should be infinity

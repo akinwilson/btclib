@@ -31,7 +31,7 @@ test_params = [(b"rust is an amazing language", b"transfer 10 dollars to xi jinp
                 (b"sie konnten auch auf Deutsche schreiben", b"transformer models", 75, True) ]
 
 @pytest.mark.parametrize("secret_mnemonic,document,random_k,expect", test_params)
-def test_generating_signature(secret_mnemonic, document, random_k, expect):
+def test_generating_signatures(secret_mnemonic, document, random_k, expect):
     '''
     generating sigs and verifying range of secrect mnemonics documents and random ks
     '''

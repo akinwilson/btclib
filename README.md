@@ -1,4 +1,6 @@
 # btclib
+![Tests](https://github.com/akinwilson/btclib/actions/workflows/tests.yaml/badge.svg)
+
 ![]( img/cowrie.jpg )
 
 ## Overview 

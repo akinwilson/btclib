@@ -63,9 +63,10 @@ import hashlib
 
 
 class Signature:
-	def __init__(self, r_x, value):
+	def __init__(self, r_x, value, display=False):
 		self.r_x = r_x
 		self.value = value
+		self.display= display
 	def __repr__(self):
 		return f'Signature({self.r_x},{self.value})'
 
@@ -75,22 +76,83 @@ class Signature:
 		 
 		
 	def der(self):
-		rxbin = self.r_x.to_bytes(32, 'big')
-		# removing all null bytes
-		rxbin = rxbin.lstrip(b"\x00")
-		# if rxbin has high bit add \x00
-		if rxbin[0] & 0x80:
-			rxbin = b'\00' + rxbin
-		result = bytes([2, len(rxbin)]) + rxbin
-		sigbin = self.value.to_bytes(32, 'big')
-		sigbin = sigbin.lstrip(b"\x00")
-		if sigbin[0] & 0x80:
-			sigbin = b'\x00' + sigbin
-		result += bytes([2, len(sigbin)]) + sigbin
+		if not self.display:
+			rxbin = self.r_x.to_bytes(32, 'big')
+			# removing all null bytes
+			rxbin = rxbin.lstrip(b"\x00")
+			# if rxbin has high bit add \x00
+			if rxbin[0] & 0x80:
+				rxbin = b'\00' + rxbin
+			result = bytes([2, len(rxbin)]) + rxbin
+			sigbin = self.value.to_bytes(32, 'big')
+			sigbin = sigbin.lstrip(b"\x00")
+			if sigbin[0] & 0x80:
+				sigbin = b'\x00' + sigbin
+			result += bytes([2, len(sigbin)]) + sigbin
 
-		return bytes([0x30, len(result)]) + result 
+			return bytes([0x30, len(result)]) + result 
+		else:
+			rxbin = self.r_x.to_bytes(32, 'big')
+			# removing all null bytes
+			rxbin = rxbin.lstrip(b"\x00")
+			# if rxbin has high bit add \x00
+			if rxbin[0] & 0x80:
+				rxbin = b'\00' + rxbin
+			
+
+
+			r_x_value = lp + f"{hex(int.from_bytes(rxbin, 'big'))}".lstrip("0x") + r 
+			r_x_length =  lc  + f"{hex(len(rxbin))}".lstrip('0x') + r 
+			r_prefxbyte = re + f"{hex(2)}".lstrip('0x') + r
+			 
+			result = bytes([2, len(rxbin)]) + rxbin
+
+			sigbin = self.value.to_bytes(32, 'big')
+			sigbin = sigbin.lstrip(b"\x00")
+			if sigbin[0] & 0x80:
+				sigbin = b'\x00' + sigbin
+			result += bytes([2, len(sigbin)]) + sigbin
+			
+
+			sig_value =  y + f"{hex(int.from_bytes(sigbin, 'big'))}".lstrip("0x") + r
+			sig_length = gr  + f"{hex(len(sigbin))}".lstrip('0x') + r
+			sig_prefxbyte =  bb + f"{hex(2)}".lstrip('0x') + r
+			
+			prefix = g + f"{hex(0x30)}".lstrip("0x") + r + w + f"{hex(len(result))}".lstrip("0x") + r
+
+			print()
+			print("Distinguished encoding representation for signatures in hex base")
+			print()
+			print(prefix + r_prefxbyte +r_x_length + r_x_value  + sig_prefxbyte + sig_length+ sig_value )
+			print("key:")
+			print(g + "Signature prefix "+ r )
+			print(w+ "Length of complete signature" + r)
+			print(y + "signature value " + r )
+			print(gr + "signature length " + r )
+			print(bb + "signature prefix " + r )
+			
+			print(lc + "r_x length " + r )
+			print(lp + "r_x value " + r )
+			print(re + "r_x prefix " + r )
+			print()
+
+
+			
 
 
 
 
 
+
+
+g='\033[0;32m'
+lp='\033[1;35m'
+lc='\033[1;36m'
+y='\033[1;33m'
+r='\033[0m'
+bb='\033[1;94m'
+gr='\033[1;90m'
+bc='\033[1;96m'
+re='\033[1;31m'
+rb='\033[1;91m'
+w='\033[1;97m'

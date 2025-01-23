@@ -194,18 +194,62 @@ class S256Point(Point):
         
     
     
-    def sec(self, compressed=True):
+    def sec(self, compressed=True, display=False):
         ''' Standardards for efficient cryptography'''
-        if not compressed:
-            return b'\x04' + self.x.element.to_bytes(32, 'big') + self.y.element.to_bytes(32, 'big')
-        
-        if compressed:
-            if self.y.element % 2 == 0:  # even y element,  
-                return b'\x02' + self.x.element.to_bytes(32, 'big')
-            else:
-                return b'\x03' + self.x.element.to_bytes(32, 'big')
-    
-    
+        if not display:
+            if not compressed:
+                return b'\x04' + self.x.element.to_bytes(32, 'big') + self.y.element.to_bytes(32, 'big')
+            if compressed:
+                if self.y.element % 2 == 0:  # even y element,  
+                    return b'\x02' + self.x.element.to_bytes(32, 'big')
+                else:
+                    return b'\x03' + self.x.element.to_bytes(32, 'big')
+        else:
+            if not compressed:
+                print()
+                print( g + '04' + r + lp + str(hex(self.x.element)).lstrip("0x") + r + lc + str(hex(self.y.element)).lstrip("0x") + r)
+                print()
+                print("Uncompressed SEC format in hex representation")
+                print()
+                print("key:")
+                print(g + "prefix byte"+ r )
+                print(lp + "x coordinate of public point" + r )
+                print(lc + "y coordinate of public point" + r )
+                print()
+            if compressed:
+                if self.y.element % 2 == 0:  # even y element,  
+                    print()
+                    print( g + '02' + r + lp + str(hex(self.x.element)).lstrip("0x") + r)
+                    print()
+                    print("Compressed SEC format in hex representation; even y coordinate")
+                    print()
+                    print("key:")
+                    print(g + "prefix byte"+ r )
+                    print(lp + "x coordinate of public point in hex" + r )
+                    print()
+                else:
+                    print()
+                    print( g + '03' + r + lp + str(hex(self.x.element)).lstrip("0x") + r)
+                    print()
+                    print("Compressed SEC format in hex representation; odd y coordinate")
+                    print()
+                    print("key:")
+                    print(g + "prefix byte"+ r )
+                    print(lp + "x coordinate of public point" + r )
+                    print()
+                    # return b'\x03' + self.x.element.to_bytes(32, 'big')
+
+
+
+g='\033[0;32m'
+lp='\033[1;35m'
+lc='\033[1;36m'
+y='\033[1;33m'
+r='\033[0m'
+bb='\033[1:94m'
+bc='\033[1:96m'
+
+
 
     
     

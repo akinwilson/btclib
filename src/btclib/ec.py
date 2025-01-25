@@ -216,6 +216,7 @@ class S256Point(Point):
                 print(lp + "x coordinate of public point" + r )
                 print(lc + "y coordinate of public point" + r )
                 print()
+                return b'\x04' + self.x.element.to_bytes(32, 'big') + self.y.element.to_bytes(32, 'big')
             if compressed:
                 if self.y.element % 2 == 0:  # even y element,  
                     print()
@@ -227,6 +228,7 @@ class S256Point(Point):
                     print(g + "prefix byte"+ r )
                     print(lp + "x coordinate of public point in hex" + r )
                     print()
+                    return b'\x02' + self.x.element.to_bytes(32, 'big')
                 else:
                     print()
                     print( g + '03' + r + lp + str(hex(self.x.element)).lstrip("0x") + r)
@@ -237,6 +239,7 @@ class S256Point(Point):
                     print(g + "prefix byte"+ r )
                     print(lp + "x coordinate of public point" + r )
                     print()
+                    return b'\x03' + self.x.element.to_bytes(32, 'big')
                     # return b'\x03' + self.x.element.to_bytes(32, 'big')
 
 

@@ -18,12 +18,6 @@ def test_standards_for_efficient_cryptography_public_key_serialisation( compress
 
 
 
-
-if __name__ == "__main__":
-
-    sig = Signature(1232313,2939349392, display=True)
-    sig.der()
-
 # Distinguished encoding rules; DER 
 # signature encoding scheme 
 # start prefix byte 0x30

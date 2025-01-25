@@ -1,5 +1,5 @@
 Pipfile
-/notebooks
+notebooks
 .vscode
 */__pycache__/*
 **/btclib.egg-info/*

@@ -1,7 +1,35 @@
+from btclib.ec import S256Point
 from btclib.ecds import Signature
 from btclib.constants import Gx, Gy, SECP256K1_A,SECP256K1_B
 
 
+def test_compressed_public_point_serialization_for_even_y_coordinate():
+
+    pk = 668868866 * S256Point(Gx, Gy, SECP256K1_A, SECP256K1_B) # even 
+    b = pk.sec(display=True)
+    assert b[0] == 2, "Expected prefix byte to be of value 2 for even y coordinate"
+    assert int.from_bytes(b[1:], 'big') == int('644e7bcaf03fc16b300b5b1645e0fa73b7f5ac9fff270e0613999dbec305ac59',16)
+
+
+def test_compressed_public_point_serialization_for_odd_y_coordinate():
+
+    pk = 666* S256Point(Gx, Gy, SECP256K1_A, SECP256K1_B) # odd 
+    b = pk.sec(display=True)
+    assert b[0] == 3
+    assert int.from_bytes(b[1:], 'big') == int('7f75c66c45a52c35ead5970bbfaafdfba626a6ddceabc14e0f8a8c7d88a5772b',16)
+
+
+
+def test_uncompressed_public_point_serialzation():
+    pk = 1066 * S256Point(Gx, Gy, SECP256K1_A, SECP256K1_B) # even 
+    b = pk.sec(compressed=False, display=True)
+    assert b[0] == 4
+    xr = f"{int.from_bytes(b[1:33], 'big'):x}"
+    yr = f"{int.from_bytes(b[33:], 'big'):x}"
+    x =  '6fe50b285af96708ad084423dc791fe8c1e3a060437aada0f1eb001643215e80'
+    y = '71769872680384f8b4f6d9191813857b01c3b5d671a7be8eaa65e919652f92ce'
+    assert xr == x
+    assert yr == y 
 
 
 def test_signature_serialization_for_display_option():

@@ -39,3 +39,4 @@ you can run the tests locally.
 
 ## Further improvements 
 
+As well as programmatically interacting with the wallet, it would be more user friendly and made accessible to a wider audience if a desktop application is developed to allow interfacing with the wallet through a graphical user interface. 

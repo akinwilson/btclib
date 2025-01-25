@@ -11,6 +11,19 @@ Note: this implementation has not been optimised for speed. Anywhere that requir
 See True random number generators for more information on the subject.
 ## Usage 
 
+```python 
+from btclib.wallet import Wallet 
+
+# reload a wallet 
+wallet = Wallet.from_path()
+# generate a new wallet 
+wallet = Wallet.new()
+# update transcation information 
+wallet.update()
+# transfer funds 
+wallet.send()
+
+```
 
 
 ## Running tests 

@@ -1,7 +1,18 @@
-from btclib.ec import S256Point
+from btclib.ec import S256Point, SecretKey
 from btclib.ecds import Signature
 from btclib.constants import Gx, Gy, SECP256K1_A,SECP256K1_B
 import pytest 
+
+
+test_cases = [(5003, True, True, 'cMahea7zqjxrtgAbB7LSGbcQUr1uX1ojuat9jZodMN8rFTv2sfUK'),
+              (2021**5, False, True, '91avARGdfge8E4tZfYLoxeJ5sGBdNJQH4kvjpWAxgzczjbCwxic'),
+              (0x54321deadbeef, True, False, 'KwDiBf89QgGbjEhKnhXJuH7LrciVrZi3qYjgiuQJv1h8Ytr2S53a')] 
+@pytest.mark.parametrize("sk, compressed, testnet, expected", test_cases)
+def test_wallet_import_format_serialization_wif(sk, compressed, testnet, expected):
+    sk =  SecretKey(sk)
+    wif = sk.wif(compressed, testnet)
+    assert wif == expected
+
 
 
 

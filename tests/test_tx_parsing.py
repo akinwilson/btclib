@@ -1,5 +1,5 @@
+from btclib.transaction import Tx
 from io import BytesIO
-
 
 tx_serialized = (
  '0100000001813f79011acb80925dfe69b3def355fe914bd1d9'

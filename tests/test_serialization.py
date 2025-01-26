@@ -1,7 +1,6 @@
 from btclib.ec import S256Point, SecretKey
 from btclib.ecds import Signature
 from btclib.constants import Gx, Gy, SECP256K1_A,SECP256K1_B
-from btclib.transaction import Tx
 import pytest 
 
 

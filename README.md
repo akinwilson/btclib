@@ -28,7 +28,7 @@ btclib --new-wallet 'cold wallet'
 btclib --wallet 'cold wallet' --balance 
 ```
 
-And there will hopefully also be a desktop application to accompany this repositories for those that are not comfortable with either the CLI or `python`. 
+And there will hopefully also be a desktop application to accompany this application for those that are not comfortable with either the CLI or `python`. 
 
 
 ## Running tests 

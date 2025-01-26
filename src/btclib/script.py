@@ -10,6 +10,12 @@ and BOTTOM of the stack is the left-most-side, the first, element in the list 1
 '''
 from .utils import hash256, hash160
 
+
+
+class Script:
+    pass 
+
+
 def op_dup(s):
     '''
     duplicate last element on stack 
@@ -38,6 +44,20 @@ def op_hash160(s):
 
 
 
+def op_0(s):
+    pass 
+
+def op_1(s):
+    pass 
+
+def op_16(s):
+    pass 
+
+def op_add(s):
+    pass 
+
+def op_checksig(s):
+    pass 
 
 
 # of byte beweem 0x01 and 75 - a value of n say -  we consider the next n bytes as elements 

@@ -45,3 +45,5 @@ you can run the tests locally.
 ## Further improvements 
 
 As well as programmatically interacting with the wallet, it would be more user friendly and made accessible to a wider audience if a desktop application is developed to allow interfacing with the wallet through a graphical user interface. 
+
+A production environment setup. Allow configuring the wallet to provide an option to store private keys in a database; sqlite, MySQL or Postgres (you'll need ot use [sqlalchemy](https://www.sqlalchemy.org/)  to defined interfaces for the most popular database [dialects](https://docs.sqlalchemy.org/en/20/core/internals.html#sqlalchemy.engine.Dialect) ), along with providing an interface to use the wallet ontop of a local bitcoin node, to allow verification of transcations faster rather than relying on external service providers to update UTXO information. 

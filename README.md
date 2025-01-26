@@ -10,7 +10,7 @@ Note: this implementation has not been optimised for speed. Anywhere that requir
 
 See True random number generators for more information on the subject.
 ## Usage 
-
+For programmatic use 
 ```python 
 from btclib.wallet import Wallet 
 
@@ -22,8 +22,14 @@ wallet = Wallet.new()
 wallet.update()
 # transfer funds 
 wallet.send()
-
 ```
+for use via the CLI 
+```bash 
+btclib --new-wallet 'cold wallet'
+btclib --wallet 'cold wallet' --balance 
+```
+
+And there will hopefully also be a desktop application to accompany this repositories for those that are not comfortable with either the CLI or `python`. 
 
 
 ## Running tests 

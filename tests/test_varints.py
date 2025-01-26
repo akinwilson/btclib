@@ -1,5 +1,5 @@
 import pytest 
-from btclib.transactions import Varint
+from btclib.transaction import Varint
 from io import BytesIO
 
 

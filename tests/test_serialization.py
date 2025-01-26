@@ -1,6 +1,17 @@
 from btclib.ec import S256Point
 from btclib.ecds import Signature
 from btclib.constants import Gx, Gy, SECP256K1_A,SECP256K1_B
+import pytest 
+
+
+
+test_cases = [(True, 33),(False, 65)]
+@pytest.mark.parametrize('compressed,sec_length', test_cases)
+def test_standards_for_efficient_cryptography_public_key_serialisation_length( compressed, sec_length):
+    sk = int.from_bytes(b"seed phrased wallet", "big") 
+    pk = sk * S256Point(Gx,Gy)
+    assert pk.sec(compressed=compressed).__len__() == sec_length
+
 
 
 def test_compressed_public_point_serialization_for_even_y_coordinate():
@@ -17,7 +28,6 @@ def test_compressed_public_point_serialization_for_odd_y_coordinate():
     b = pk.sec(display=True)
     assert b[0] == 3
     assert int.from_bytes(b[1:], 'big') == int('7f75c66c45a52c35ead5970bbfaafdfba626a6ddceabc14e0f8a8c7d88a5772b',16)
-
 
 
 def test_uncompressed_public_point_serialzation():
@@ -58,7 +68,7 @@ def test_signature_parsing():
     #  NOTE 
     # Why to I have to multiple by 2 get the right answer? for the length?
     r_x_len16 = x[6:8] # base 16 
-    r_x_len10 = int(r_x_len16,16) *2  # how chars, one char = 2 bytes are the r_x value
+    r_x_len10 = int(r_x_len16,16) *2  # how chars, one char = 1 bytes in base 2 has len 8, in base 16, len 2. i.r two hex digit represent one byte 
     r_x_val = x[8:8+r_x_len10]
 
     assert r_x_val == '37206a0610995c58074999cb9767b87af4c4978db68c06e8e6e81d282047a7c6' 

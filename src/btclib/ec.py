@@ -194,11 +194,25 @@ class S256Point(Point):
         return hash160(self.sec(compressed))
     
     def address(self, compressed=True, testnet=True):
+        '''
+        address format:
+        prefix byte b'\6f' | b'\00'  for testnet | mainet respectively 
+        public_point_hash = ripemd160(hash256(self.sec()))
+
+        Note: together, people refer to sequence of hashing above  as hash160
+        
+        network_public_point_hash = concact( prefix, public_point_hash) 
+        
+        checksum = hash256(network_public_point_hash)[:4] <---- checksum 
+        address = concat(network_public_point_hash,checksum)
+
+        public_address = base58.encode(address)
+        '''
         h160 = self.hash160(compressed)
         if testnet:
-            prefix = b'\6f'
+            prefix = b'\x6f'
         else:
-            prefix = b'\00'
+            prefix = b'\x00'
         return encode_base58_checksum(prefix + h160)
         
         

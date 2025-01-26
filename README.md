@@ -6,8 +6,8 @@
 ## Overview 
 Implementation of bitcoin library in python allowing for private and public key generation, transaction creation, signing, verification and broadcasting along with a wallet implementation. Project is accompanied with a CLI interface and desktop application. 
 
-Wallets offered by companies like [coinbase](https://www.coinbase.com/en-gb) do not embrace the decentralisation principal that cryto-currencies and their underlying technologh promote since coinbase still act like a vanilla custodian bank; i.e they are in control of your funds. btclib promotes this principal of decentralisation by allow you to store the information which controls your coins (private or secret keys) locally on your desktop. 
- 
+Wallets offered by companies like [coinbase](https://www.coinbase.com/en-gb) do not embrace the decentralisation principal that crypto-currencies and their underlying technology promote since coinbase still act like a vanilla custodian bank; i.e they are in control of your funds. btclib promotes this principal of decentralisation by allow you to store the information which controls your coins (private or secret keys) locally on your desktop. 
+
 ## Usage 
 For programmatic use 
 ```python 

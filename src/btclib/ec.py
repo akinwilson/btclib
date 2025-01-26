@@ -230,39 +230,30 @@ class S256Point(Point):
                     return b'\x03' + self.x.element.to_bytes(32, 'big')
         else:
             if not compressed:
-                print()
-                print( g + '04' + r + lp + str(hex(self.x.element)).lstrip("0x") + r + lc + str(hex(self.y.element)).lstrip("0x") + r)
-                print()
-                print("Uncompressed SEC format in hex representation")
-                print()
+                print( '\n' + g + '04' + r + lp + str(hex(self.x.element)).lstrip("0x") + r + lc + str(hex(self.y.element)).lstrip("0x") + r)
+                print("\nUncompressed SEC format in hex representation\n")
                 print("key:")
                 print(g + "prefix byte"+ r )
                 print(lp + "x coordinate of public point" + r )
-                print(lc + "y coordinate of public point" + r )
-                print()
+                print(lc + "y coordinate of public point" + r + '\n' )
+                
                 return b'\x04' + self.x.element.to_bytes(32, 'big') + self.y.element.to_bytes(32, 'big')
             if compressed:
                 if self.y.element % 2 == 0:  # even y element,  
-                    print()
-                    print( g + '02' + r + lp + str(hex(self.x.element)).lstrip("0x") + r)
-                    print()
-                    print("Compressed SEC format in hex representation; even y coordinate")
-                    print()
+                    print( '\n' + g + '02' + r + lp + str(hex(self.x.element)).lstrip("0x") + r)
+                    print("\nCompressed SEC format in hex representation; even y coordinate\n")
                     print("key:")
                     print(g + "prefix byte"+ r )
-                    print(lp + "x coordinate of public point in hex" + r )
-                    print()
+                    print(lp + "x coordinate of public point in hex" + r + '\n')
+                 
                     return b'\x02' + self.x.element.to_bytes(32, 'big')
                 else:
                     print()
                     print( g + '03' + r + lp + str(hex(self.x.element)).lstrip("0x") + r)
-                    print()
-                    print("Compressed SEC format in hex representation; odd y coordinate")
-                    print()
+                    print("\nCompressed SEC format in hex representation; odd y coordinate\n")
                     print("key:")
                     print(g + "prefix byte"+ r )
-                    print(lp + "x coordinate of public point" + r )
-                    print()
+                    print(lp + "x coordinate of public point" + r + '\n')
                     return b'\x03' + self.x.element.to_bytes(32, 'big')
                     # return b'\x03' + self.x.element.to_bytes(32, 'big')
 
@@ -283,6 +274,15 @@ class SecretKey:
         return f"{self.sk:x}".zfill(64)
 
     def deterministic_k(self, z):
+        '''
+        IMPORTANT: reusing k will leak your private key 
+
+        see https://medium.com/asecuritysite-when-bob-met-alice/not-playing-randomly-the-sony-ps3-and-bitcoin-crypto-hacks-c1fe92bea9bc
+
+        hence why this function exists 
+        defined here: https://en.bitcoin.it/wiki/BIP_0032
+        '''
+        
         key = b"\x00" * 32
         val = b"\x01" * 32
 

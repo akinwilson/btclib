@@ -2,8 +2,8 @@ from btclib.utils import hash256
 import requests
 from io import BytesIO
 
-from .script import Script 
-
+# from .script import Script 
+from typing import BinaryIO
 
 class TxFetcher:
     cache = {}
@@ -67,19 +67,20 @@ class Tx:
 
     def serialize(self):
         result = self.version.to_bytes(4, "little")
-        result += encode_varint(len(self.tx_ins))
+        result += Varint.encode(len(self.tx_ins))
         for tx_in in self.tx_ins:
             result += tx_in.serialize()
 
-        result += encode_varint(len(self.tx_outs))
+        result += Varint.encode(len(self.tx_outs))
         for tx_out in self.tx_outs:
             result += tx_out.serialize()
         result += self.locktime.to_bytes(4, "little")
         return result
 
     @classmethod
-    def parse(cls, s):
+    def parse(cls, s:BinaryIO):
         version = s.read(4)
+        int.from_bytes(version, 'little')
         pass
 
 
@@ -88,10 +89,14 @@ class TxIn:
     def __init__(self, prev_tx, prev_index, script_sig=None, sequence=0xFFFFFFFF):
         self.prev_tx = prev_tx
         self.prev_index = prev_index
-        if script_sig is None:
-            self.script_sig = Script()
-        else:
-            self.script_sig = script_sig
+        
+        
+        # if script_sig is None:
+        #     self.script_sig = Script()
+        # else:
+        #     self.script_sig = script_sig
+        
+        
         self.sequence = sequence
 
     def __repr__(self):
@@ -132,26 +137,46 @@ class TxOut:
         return result
 
 
-def read_varint(s):
-    i = s.read(1)[0]
-    if i == 0xFD:
-        return int.from_bytes(s.read(2), "little")
-    elif i == 0xFE:
-        return int.from_bytes(s.read(4), "little")
-    elif i == 0xFF:
-        return int.from_bytes(s.read(8), "little")
-    else:
-        return i
+
+class Varint:
+    '''
+    For parsing the mount of inputs, where there may be more than 255 (a single byte) amount of inputs 
+    if x < 253:
+        encode as single byte 
+        
+    if 65535 > x >= 253:
+        start with 253 byte [ fd ] then encode number in 2 bytes using little-endian 
+        e.g 255 -> fd + int(255).to_bytes(2, 'little').hex() = fdxff00
+        e.g 555 -> fd + int(555).to_bytes(2, 'little').hex() = fd2b02
+
+    if 4294967295 > x >= 65535:
+        start with 254 byte [ fe ] then encode the number in 4 bytes using little-endian 
+        e.g. 70015 -> 0xfe + int(70015).to_bytes(4, 'little').hex() = fe7f110100
+
+    if  18446744073709551615 > x >= 4294967295:
+        strt with 255 byte [ ff ] then encode the number in 8 bytes using little-endian 
+        e.g.  18005558675309 -> ff int(18005558675309).to_bytes(8, 'little').hex() = ff6dc7ed3e60100000
+    '''
+    def decode(s):
+        i = s.read(1)[0]
+        if i == 0xFD:
+            return int.from_bytes(s.read(2), "little")
+        elif i == 0xFE:
+            return int.from_bytes(s.read(4), "little")
+        elif i == 0xFF:
+            return int.from_bytes(s.read(8), "little")
+        else:
+            return i
 
 
-def encode_varint(i):
-    if i < 0xFD:
-        return bytes([i])
-    elif i < 0x10000:
-        return b"\xfd" + i.to_bytes(2, "little")
-    elif i < 0x100000000:
-        return b"\xfe" + i.to_bytes(4, "little")
-    elif i < 0x10000000000000000:
-        return b"\xff" + i.to_bytes(8, "little")
-    else:
-        raise ValueError(f"Integer {i} is too large")
+    def encode(i):
+        if i < 0xFD:
+            return bytes([i])
+        elif i < 0x10000:
+            return b"\xfd" + i.to_bytes(2, "little")
+        elif i < 0x100000000:
+            return b"\xfe" + i.to_bytes(4, "little")
+        elif i < 0x10000000000000000:
+            return b"\xff" + i.to_bytes(8, "little")
+        else:
+            raise ValueError(f"Integer {i} is too large")

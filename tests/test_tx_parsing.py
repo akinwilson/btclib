@@ -30,3 +30,11 @@ def test_parsing_previous_index_from_transaction_hex_dump():
     tx =  Tx.parse(s)   
     assert tx.tx_ins[0].prev_index == 0 
 
+def test_parsing_outputs_of_transaction():
+    s = BytesIO(bytes.fromhex(tx_serialized))
+    tx =  Tx.parse(s)
+    assert tx.tx_outs.__len__() == 2 
+    expect = 32454049
+    assert tx.tx_outs[0].amount == expect 
+    expect = 10011545
+    assert tx.tx_outs[1].amount == expect 

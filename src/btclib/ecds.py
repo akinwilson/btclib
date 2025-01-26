@@ -1,5 +1,20 @@
 # elliptic curve signature algorithm
 import hashlib
+
+
+# ansi escape codes ; https://en.wikipedia.org/wiki/ANSI_escape_code
+g='\033[0;32m'
+lp='\033[1;35m'
+lc='\033[1;36m'
+y='\033[1;33m'
+r='\033[0m'
+bb='\033[1;94m'
+gr='\033[1;90m'
+bc='\033[1;96m'
+re='\033[1;31m'
+rb='\033[1;91m'
+w='\033[1;97m'
+
 # want to 'sign' a 'document' s.t. it can be verified that the signature produced for document could only have been created by someone who knows the private/secret key, x, corresponding to a public key, y, where y is visible to all. 
 
  #  let g be the generator point 
@@ -38,13 +53,13 @@ import hashlib
 # the signature is composed of  s and r_x
 
 # NOTE: 
-# private_key                        x      private 
-# random_target                  b      private 
-# generator_point                g      public
-# public_key                         y       public 
-# x_coord_random_point   r_x    public
+# private_key                    x       private 
+# random_target                  b       private 
+# generator_point                g       public
+# public_key                     y       public 
+# x_coord_random_point           r_x     public
 # signature_value                s       public
-# hashed_document           z       public 
+# hashed_document                z       public 
 
 # we DO NOT reveal b because:
 # s = (x * r_x + z ) * b^(-1) rearranged leads to
@@ -180,15 +195,3 @@ class Signature:
 
 
 
-
-g='\033[0;32m'
-lp='\033[1;35m'
-lc='\033[1;36m'
-y='\033[1;33m'
-r='\033[0m'
-bb='\033[1;94m'
-gr='\033[1;90m'
-bc='\033[1;96m'
-re='\033[1;31m'
-rb='\033[1;91m'
-w='\033[1;97m'

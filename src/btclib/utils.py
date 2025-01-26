@@ -11,36 +11,41 @@ def hash256(s):
     return hashlib.sha256(hashlib.sha256(s).digest()).digest()
 
 
-BASE58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+class Base58:
+    SYMBOLS = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+    ORDER = SYMBOLS.__len__()  # aka cardinality
+    def encode(s: bytes):
+        # Counting leading zeros 
+        # 
+        count = 0
+        for c in s:
+            if c == 0:
+                count += 1
+            else:
+                break
+        
+        num = int.from_bytes(s, "big")
+        # adding leading zeros in base58 representation (1s), back    
+        prefix = Base58.SYMBOLS[0] * count
+        result = ""
+        while num > 0:
+            num, mod = divmod(num, Base58.ORDER)
+            result = Base58.SYMBOLS[mod] + result
+        return prefix + result
 
 
-def encode_base58(s):
-    count = 0
-    for c in s:
-        if c == 0:
-            count += 1
-        else:
-            break
-    num = int.from_bytes(s, "big")
-    prefix = "1" * count
-    result = ""
-    while num > 0:
-        num, mod = divmod(num, 58)
-        result = BASE58_ALPHABET[mod] + result
-    return prefix + result
-
-
-def decode_base58(s):
-    num = 0
-    for c in s:
-        num *= 58
-        num += BASE58_ALPHABET.index(c)
-    combined = num.to_bytes(25, byteorder="big")
-    checksum = combined[-4:]
-    if hash256(combined[:-4])[:4] != checksum:
-        raise ValueError(f"bad address: {checksum} {hash256(combined[:-4])[:4]}")
-    return combined[1:-4]
+    def decode(s):
+        num = 0
+        for c in s:
+            num *= Base58.ORDER # increment the value each digit placeholder can hold
+            num += Base58.SYMBOLS.index(c)
+        # combined = num.to_bytes(25, byteorder="big")
+        return f"{num:x}"
+        # checksum = combined[-4:]
+        # if hash256(combined[:-4])[:4] != checksum:
+        #     raise ValueError(f"bad address: {checksum} {hash256(combined[:-4])[:4]}")
+        # return combined[1:-4]
 
 
 def encode_base58_checksum(b):
-    return encode_base58(b + hash256(b)[:4])
+    return Base58.encode(b + hash256(b)[:4])

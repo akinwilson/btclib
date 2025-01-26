@@ -17,6 +17,16 @@ import hmac
 # 4) invertibility -> A + (- A) = I
 
 
+# ansi escape codes ; https://en.wikipedia.org/wiki/ANSI_escape_code
+g='\033[0;32m'
+lp='\033[1;35m'
+lc='\033[1;36m'
+y='\033[1;33m'
+r='\033[0m'
+bb='\033[1:94m'
+bc='\033[1:96m'
+
+
 # from finite_field import FiniteElement
 class Point:
 
@@ -244,13 +254,6 @@ class S256Point(Point):
 
 
 
-g='\033[0;32m'
-lp='\033[1;35m'
-lc='\033[1;36m'
-y='\033[1;33m'
-r='\033[0m'
-bb='\033[1:94m'
-bc='\033[1:96m'
 
 
 

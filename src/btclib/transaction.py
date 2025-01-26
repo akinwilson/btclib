@@ -1,6 +1,7 @@
 from btclib.utils import hash256
 import requests
 from io import BytesIO
+import json 
 
 # from .script import Script 
 from typing import BinaryIO
@@ -11,14 +12,14 @@ class TxFetcher:
     @classmethod
     def get_url(cls, testnet=False):
         if testnet:
-            return "https://testnet.programmingbitcoin.com"
+            return "https://blockstream.info/testnet/api/"
         else:
-            return "https://mainnet.programmingbitcoin.com"
+            return "https://blockstream.info/api/"
 
     @classmethod
     def fetch(cls, tx_id, testnet=False, fresh=False):
         if fresh or (tx_id not in cls.cache):
-            url = f"{cls.get_url(testnet)}/tx/{tx_id}.hex"
+            url = f"{cls.get_url(testnet)}/tx/{tx_id}/hex"
             response = requests.get(url)
             try:
                 raw = bytes.fromhex(response.text.strip())
@@ -39,11 +40,33 @@ class TxFetcher:
 
         cls.cache[tx_id].testnet = testnet
         return cls.cache[tx_id]
+    
+    @classmethod
+    def load_cache(cls, filepath):
+        with open(filepath, 'r') as f:
+            disk_cache = json.loads(f.read())
+        
+        for k, raw_hex in disk_cache.items():
+            raw = bytes.fromhex(raw_hex)
+            if raw[0] == 0:
+                raw = raw[:4] + raw[6:]
+                tx = Tx.parse(BytesIO(raw))
+                tx.locktime = int.from_bytes(raw[-4:], 'little')
+            else:
+                tx = Tx.parse(BinaryIO(raw))
+    
+
+    @classmethod
+    def dump_cache(cls, filepath):
+        with open(filepath, 'w') as f:
+            dump = {k: tx.serialize().hex() for k,tx in cls.cache.items()}
+            f.write(json.dumps(dump, sort_keys=True, indent=4))
+
 
 
 class Tx:
 
-    def __init__(self, version, tx_ins, tx_outs, locktime, testnet=False):
+    def __init__(self, version, tx_ins=[], tx_outs="", locktime: int =10, testnet: bool =False):
         self.version = version
         self.tx_ins = tx_ins
         self.tx_outs = tx_outs
@@ -53,10 +76,10 @@ class Tx:
     def __repr__(self):
         tx_ins = ""
         for tx_in in self.tx_ins:
-            txt_ins += tx_in.__repr__() + "\n"
+            tx_ins += tx_in.__repr__() + "\n"
         tx_outs = ""
         for tx_out in self.tx_outs:
-            txt_outs += tx_out.__repr__() + "\n"
+            tx_outs += tx_out.__repr__() + "\n"
         return f"Tx: {self.id()}\nverison: {self.version}\ntx_ins:\n{tx_ins}tx_outs:\n{tx_outs}locktime: {self.locktime}"
 
     def id(self):
@@ -78,10 +101,19 @@ class Tx:
         return result
 
     @classmethod
-    def parse(cls, s:BinaryIO):
-        version = s.read(4)
-        int.from_bytes(version, 'little')
-        pass
+    def parse(cls, s:BinaryIO, testnet : bool = False):
+        v_bytes = s.read(4)
+        version = int.from_bytes(v_bytes, 'little')
+
+        num_inputs = Varint.decode(s)
+        inputs =[TxIn.parse(s) for _ in range(num_inputs)]
+        # tx_in  = TxIn.parse(s)
+        # print(f'{version=}')
+        # print(f'{num_inputs=}')
+
+        return Tx(version=version, tx_outs=None, locktime=None, tx_ins=inputs, testnet=testnet)
+    
+
 
 
 class TxIn:
@@ -89,7 +121,6 @@ class TxIn:
     def __init__(self, prev_tx, prev_index, script_sig=None, sequence=0xFFFFFFFF):
         self.prev_tx = prev_tx
         self.prev_index = prev_index
-        
         
         # if script_sig is None:
         #     self.script_sig = Script()
@@ -114,11 +145,28 @@ class TxIn:
         return tx.tx_outs[self.prev_index].script_pubkey
 
     def serialize(self):
+        '''
+        result is a byte string 
+        '''
         result = self.prev_tx[::-1]
+
+        # self.prev_index is already bytes? why to bytes?
+
         result += self.prev_index.to_bytes(4, "little")
-        result += self.script_sig.serialize()
+        
+        # result += self.script_sig.serialize()
         result += self.sequence.to_bytes(4, "little")
         return result
+
+    @classmethod
+    def parse(cls, s:BinaryIO):
+        prev_tx_hash_bytes = s.read(32)[::-1]
+        # prev_tx_hash = int.from_bytes(prev_tx_hash_bytes, 'little')
+        prev_tx_idx = int.from_bytes(s.read(4), 'little') 
+        # script_sig = Script.parse(s)
+        # prev_tx_idx = int.from_bytes(prev_tx_idx_bytes, 'little')
+        return TxIn(prev_tx=prev_tx_hash_bytes, prev_index=prev_tx_idx)
+
 
 
 class TxOut:

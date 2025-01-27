@@ -13,8 +13,18 @@ def test_wallet_import_format_serialization_wif(sk, compressed, testnet, expecte
     wif = sk.wif(compressed, testnet)
     assert wif == expected
 
+# TODO 
+def test_prefix_of_wif_format():
+    # testnet 'b\xef'
+    # mainnet 'b\x80'
+    # compressed b'\x01'
 
+    pass 
 
+def test_prefix_public_point_key_prefix():
+    # testnet 'b\x6f'
+    # mainnet 'b\x00'
+    pass 
 
 test_cases = [(True, 33),(False, 65)]
 @pytest.mark.parametrize('compressed,sec_length', test_cases)

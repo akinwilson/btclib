@@ -40,7 +40,11 @@ then, with
 ```
 python -m pytest
 ```
-you can run the tests locally.
+you can run the tests locally. For more information on how these tests are performed run the following command instead:
+```
+python -m pytest -s 
+```
+
 
 ## Further improvements 
 

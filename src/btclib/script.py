@@ -17,6 +17,48 @@ class Script:
         else:
             self.cmds = cmds
     
+
+    
+    def raw_serialize(self):
+        # initialize what we'll send back
+        result = b''
+        # go through each cmd
+        for cmd in self.cmds:
+            # if the cmd is an integer, it's an opcode
+            if type(cmd) == int:
+                # turn the cmd into a single byte integer using int_to_little_endian
+                result += cmd.to_bytes(1, 'little')
+            else:
+                # otherwise, this is an element
+                # get the length in bytes
+                length = len(cmd)
+                # for large lengths, we have to use a pushdata opcode
+                if length < 75:
+                    # turn the length into a single byte integer
+                    result += length.to_bytes(1, 'little')
+                elif length > 75 and length < 0x100:
+                    # 76 is pushdata1
+                    result += int(76).to_bytes(1, 'little')
+                    result += length.to_bytes(1, 'little')
+                elif length >= 0x100 and length <= 520:
+                    # 77 is pushdata2
+                    result += int(77).to_bytes(1, 'little')
+                    result += length.to_bytes(2, 'little')
+                else:
+                    raise ValueError('too long an cmd')
+                result += cmd
+        return result
+
+
+
+    def serialize(self):
+        # get the raw serialization (no prepended length)
+        result = self.raw_serialize()
+        # get the length of the whole thing
+        total = len(result)
+        # encode_varint the total length of the result and prepend
+        return Varint.encode(total) + result
+
     @classmethod
     def parse(cls, s):
         # get the length of the entire field

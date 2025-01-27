@@ -94,7 +94,7 @@ class Tx:
     def hash(self):
         return hash256(self.serialize())[::-1]
 
-    def serialize(self):
+    def serialize(self) -> bytes:
         result = self.version.to_bytes(4, "little")
         result += Varint.encode(len(self.tx_ins))
         for tx_in in self.tx_ins:
@@ -209,12 +209,9 @@ class TxIn:
         result is a byte string 
         '''
         result = self.prev_tx[::-1]
-
         # self.prev_index is already bytes? why to bytes?
-
         result += self.prev_index.to_bytes(4, "little")
-        
-        # result += self.script_sig.serialize()
+        result += self.script_sig.serialize()
         result += self.sequence.to_bytes(4, "little")
         return result
 
@@ -243,7 +240,7 @@ class TxIn:
         # script_sig = Script.parse(s)cr
         # prev_tx_idx = int.from_bytes(prev_tx_idx_bytes, 'little')
 
-        return TxIn(prev_tx=prev_tx_hash, script_sig=None, prev_index=prev_tx_idx)
+        return TxIn(prev_tx=prev_tx_hash, script_sig=script_sig, prev_index=prev_tx_idx)
 
 
 
@@ -271,13 +268,15 @@ class TxOut:
         # print("s.read(8) to little int", int.from_bytes(s.read(8), 'little'))
         amount = int.from_bytes(s.read(8), 'little')        
         # print(f"{amount=}")
-        script_pub_key_len = Varint.decode(s)
+        # script_pub_key_len = Varint.decode(s)
         # print(s.read(8).hex())
-        script_pub_key = s.read(script_pub_key_len).hex() # , 'little')
+
+        script_pubkey = Script.parse(s)
+        # script_pub_key = s.read(script_pub_key_len) # , 'little')
         # print(f"{script_pub_key_len=}")
         # print(f"{script_pub_key=}")
         # amount = int.from_bytes(s.read(8), 'little')
-        return TxOut(amount=amount, script_pubkey=script_pub_key)
+        return TxOut(amount=amount, script_pubkey=script_pubkey)
         # num_outputs = Varint.decode(s) # .read(4), 'little')
         # print(f"{num_outputs=}")
         # outputs = [TxOut.parse(s) for _ in range(num_outputs)]

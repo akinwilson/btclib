@@ -8,12 +8,58 @@ the TOP of the stack is the right-hand-side, the last, element in the list 6
 and BOTTOM of the stack is the left-most-side, the first, element in the list 1
 
 '''
-from .utils import hash256, hash160
-
-
-
+from .utils import hash256, hash160, Varint
 class Script:
-    pass 
+
+    def __init__(self, cmds=None):
+        if cmds is None:
+            self.cmds = []
+        else:
+            self.cmds = cmds
+    
+    @classmethod
+    def parse(cls, s):
+        # get the length of the entire field
+        length = Varint.decode(s)
+        # initialize the cmds array
+        cmds = []
+        # initialize the number of bytes we've read to 0
+        count = 0
+        # loop until we've read length bytes
+        while count < length:
+            # get the current byte
+            current = s.read(1)
+            # increment the bytes we've read
+            count += 1
+            # convert the current byte to an integer
+            current_byte = current[0]
+            # if the current byte is between 1 and 75 inclusive
+            if current_byte >= 1 and current_byte <= 75:
+                # we have an cmd set n to be the current byte
+                n = current_byte
+                # add the next n bytes as an cmd
+                cmds.append(s.read(n))
+                # increase the count by n
+                count += n
+            elif current_byte == 76:
+                # op_pushdata1
+                data_length = int.from_bytes(s.read(1), 'little')
+                cmds.append(s.read(data_length))
+                count += data_length + 1
+            elif current_byte == 77:
+                # op_pushdata2
+                data_length = int.from_bytes(s.read(2), 'little')
+                cmds.append(s.read(data_length))
+                count += data_length + 2
+            else:
+                # we have an opcode. set the current byte to op_code
+                op_code = current_byte
+                # add the op_code to the list of cmds
+                cmds.append(op_code)
+        if count != length:
+            raise SyntaxError('parsing script failed')
+        return cls(cmds)
+
 
 
 def op_dup(s):

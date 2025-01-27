@@ -4,16 +4,13 @@ from io import BytesIO
 import json 
 
 from .script import Script 
+from .utils import Varint
 from typing import BinaryIO
 
-# script_hex = ('6b483045022100ed81ff192e75a3fd2304004dcadb746fa5e24c50'
-#               '31ccfcf21320b0277457c98f02207a986d955c6e0cb35d446a89d3'
-#               'f56100f4d7f67801c31967743a9c8e10615bed01210349fc4e631e'
-#         '3624a545de3f89f5d8684c7b8138bd94bdd531d2e213bf016b278a')
-SCRIPT_HEX = ('6b483045022100ed81ff192e75a3fd2304004dcadb746fa5e24c50'
-            '31ccfcf21320b0277457c98f02207a986d955c6e0cb35d446a89d3'
-            'f56100f4d7f67801c31967743a9c8e10615bed01210349fc4e631e'
-            '3624a545de3f89f5d8684c7b8138bd94bdd531d2e213bf016b278a')
+# SCRIPTSIG_HEX = ('6b483045022100ed81ff192e75a3fd2304004dcadb746fa5e24c50'
+#             '31ccfcf21320b0277457c98f02207a986d955c6e0cb35d446a89d3'
+#             'f56100f4d7f67801c31967743a9c8e10615bed01210349fc4e631e'
+#             '3624a545de3f89f5d8684c7b8138bd94bdd531d2e213bf016b278a')
 
 class TxFetcher:
     cache = {}
@@ -111,12 +108,23 @@ class Tx:
 
     @classmethod
     def parse(cls, s:BinaryIO, testnet : bool = False):
-        v_bytes = s.read(4)
+
+        v_bytes = s.read(4) # first 4 bytes are version bytes 
         version = int.from_bytes(v_bytes, 'little')
-        print("verison: ", version)
+        # print("verison: ", version)
+
         num_inputs = Varint.decode(s)
-        print("num inputs", num_inputs)
+        # print("num inputs", num_inputs)
         inputs =[TxIn.parse(s) for _ in range(num_inputs)]
+
+        # next, we have a varint for the script_sig (we dont know how long it is ahead of time) 
+        # scriptsig_len  = Varint.decode(s) + 1
+        # print(f"[tx]: {scriptsig_len=}")
+
+        # scriptsig = s.read(scriptsig_len)
+
+        # print(f"[tx]: {scriptsig.hex()}")
+
         # when pass the stream into the above class, its 
         # is not reading move the pointer along.
 
@@ -124,12 +132,12 @@ class Tx:
         # this will be produced by the soon-to-be-defined Script class
         # until then, hard-coding its value
         #######################################################################
-        matched = False
-        test_hex = ''
-        while not matched:
-            test_hex += s.read(1).hex()
-            if test_hex == SCRIPT_HEX:
-                break 
+        # matched = False
+        # test_hex = ''
+        # while not matched:
+        #     test_hex += s.read(1).hex()
+        #     if test_hex == SCRIPTSIG_HEX:
+        #         break 
         ##########################################################################
 
         # sequences = [int.from_bytes(s.read(4), 'little') for _ in range(num_inputs)]
@@ -212,17 +220,30 @@ class TxIn:
 
     @classmethod
     def parse(cls, s:BinaryIO):
-        prev_tx_hash_bytes = s.read(32)[::-1]
-        print('prev_tx_hash_bytes', prev_tx_hash_bytes.hex())
+        '''
+        the stream has already had the:
+         - verions: 4 bytes 
+         - number of inputs: varint; {2|4|8} bytes
+         consumed.  
+
+         next, for the input object, we parse:
+         - previous transaction hash: 32 bytes
+         - previous transaction index: 4 bytes 
+
+        '''
+        prev_tx_hash = s.read(32)[::-1]
+        # print('prev_tx_hash', prev_tx_hash.hex())
         # prev_tx_hash = int.from_bytes(prev_tx_hash_bytes, 'little')
         prev_tx_idx = int.from_bytes(s.read(4), 'little')
 
-        print("previous tx id :", prev_tx_idx)
+        # print("previous tx id :", prev_tx_idx)
         
+        script_sig = Script.parse(s)
         # print("Byte stream left: ", len(s.read()))
         # script_sig = Script.parse(s)cr
         # prev_tx_idx = int.from_bytes(prev_tx_idx_bytes, 'little')
-        return TxIn(prev_tx=prev_tx_hash_bytes, prev_index=prev_tx_idx)
+
+        return TxIn(prev_tx=prev_tx_hash, script_sig=None, prev_index=prev_tx_idx)
 
 
 
@@ -263,48 +284,3 @@ class TxOut:
         # print(f"{num_outputs=}")
         # print(f"{outputs=}")
         # return outputs
-
-
-
-class Varint:
-    '''
-    For parsing the mount of inputs, where there may be more than 255 (a single byte) amount of inputs 
-    if x < 253:
-        encode as single byte 
-        
-    if 65535 > x >= 253:
-        start with 253 byte [ fd ] then encode number in 2 bytes using little-endian 
-        e.g 255 -> fd + int(255).to_bytes(2, 'little').hex() = fdxff00
-        e.g 555 -> fd + int(555).to_bytes(2, 'little').hex() = fd2b02
-
-    if 4294967295 > x >= 65535:
-        start with 254 byte [ fe ] then encode the number in 4 bytes using little-endian 
-        e.g. 70015 -> 0xfe + int(70015).to_bytes(4, 'little').hex() = fe7f110100
-
-    if  18446744073709551615 > x >= 4294967295:
-        strt with 255 byte [ ff ] then encode the number in 8 bytes using little-endian 
-        e.g.  18005558675309 -> ff int(18005558675309).to_bytes(8, 'little').hex() = ff6dc7ed3e60100000
-    '''
-    def decode(s):
-        i = s.read(1)[0]
-        if i == 0xFD:
-            return int.from_bytes(s.read(2), "little")
-        elif i == 0xFE:
-            return int.from_bytes(s.read(4), "little")
-        elif i == 0xFF:
-            return int.from_bytes(s.read(8), "little")
-        else:
-            return i
-
-
-    def encode(i):
-        if i < 0xFD:
-            return bytes([i])
-        elif i < 0x10000:
-            return b"\xfd" + i.to_bytes(2, "little")
-        elif i < 0x100000000:
-            return b"\xfe" + i.to_bytes(4, "little")
-        elif i < 0x10000000000000000:
-            return b"\xff" + i.to_bytes(8, "little")
-        else:
-            raise ValueError(f"Integer {i} is too large")

@@ -59,6 +59,9 @@ def test_parsing_outputs_of_transaction():
     assert tx.tx_outs[0].amount == result['outs'][0]['value'] if NETWORK_CONNECTED else expect 
     expect = 10011545
     assert tx.tx_outs[1].amount == result['outs'][1]['value'] if NETWORK_CONNECTED else expect
-
-    assert tx.tx_outs[0].script_pubkey == result['outs'][0]['script']['hex'] if NETWORK_CONNECTED else '76a914bc3b654dca7e56b04dca18f2566cdaf02e8d9ada88ac'
-    assert tx.tx_outs[1].script_pubkey == result['outs'][1]['script']['hex'] if NETWORK_CONNECTED else '76a9141c4bc762dd5423e332166702cb75f40df79fea1288ac'
+    
+    ## inside of Script.serialize(), we preprend the length of the pubkey script to the serialisation of it
+    # the problem is, this a a Varint, hence, to parameterised this, we need to know the length of the pubkey script for every output tx 
+    assert tx.tx_outs[1].script_pubkey.serialize().hex()[2:] == result['outs'][1]['script']['hex'] if NETWORK_CONNECTED else '76a9141c4bc762dd5423e332166702cb75f40df79fea1288ac', f"{tx.tx_outs[1].script_pubkey.serialize().hex()} versus 76a9141c4bc762dd5423e332166702cb75f40df79fea1288ac"
+    assert tx.tx_outs[0].script_pubkey.serialize().hex()[2:] == result['outs'][0]['script']['hex'] if NETWORK_CONNECTED else '76a914bc3b654dca7e56b04dca18f2566cdaf02e8d9ada88ac', f"{tx.tx_outs[0].script_pubkey.serialize().hex()} versus 76a914bc3b654dca7e56b04dca18f2566cdaf02e8d9ada88ac"
+ 

@@ -28,6 +28,7 @@ class Script:
             if type(cmd) == int:
                 # turn the cmd into a single byte integer using int_to_little_endian
                 result += cmd.to_bytes(1, 'little')
+                # print(f"raw_serialize: {result}")
             else:
                 # otherwise, this is an element
                 # get the length in bytes
@@ -58,11 +59,13 @@ class Script:
         total = len(result)
         # encode_varint the total length of the result and prepend
         return Varint.encode(total) + result
+        return  result
 
     @classmethod
     def parse(cls, s):
         # get the length of the entire field
         length = Varint.decode(s)
+        # print(f"length: {length}")
         # initialize the cmds array
         cmds = []
         # initialize the number of bytes we've read to 0

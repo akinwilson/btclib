@@ -5,7 +5,7 @@ import json
 
 from .script import Script 
 from .utils import Varint
-from typing import BinaryIO, List, 
+from typing import BinaryIO, List
 
 
 class TxFetcher:
@@ -23,15 +23,18 @@ class TxFetcher:
         if fresh or (tx_id not in cls.cache):
             url = f"{cls.get_url(testnet)}/tx/{tx_id}/hex"
             response = requests.get(url)
+            print(f"{response.text=}")
             try:
                 raw = bytes.fromhex(response.text.strip())
             except ValueError:
                 raise ValueError(f"Unexpected response: {response.text}")
             if raw[4] == 0:
+                print("Hit")
                 raw = raw[:4] + raw[6:]
                 tx = Tx.parse(BytesIO(raw), testnet=testnet)
                 tx.locktime = int.from_bytes(raw[-4:], "little")
             else:
+                print("Hit else")
                 tx = Tx.parse(BytesIO(raw), testnet=testnet)
             if tx.id() != tx_id:
                 raise ValueError(
@@ -70,7 +73,7 @@ class TxFetcher:
 
 class TxIn:
 
-    def __init__(self, prev_tx, prev_index, script_sig=None, sequence=0xFFFFFFFF):
+    def __init__(self, prev_tx, prev_index, script_sig=None, sequence=0xFFFFFFFF, testnet=False):
         self.prev_tx = prev_tx
         self.prev_index = prev_index
         
@@ -93,7 +96,7 @@ class TxIn:
         return tx.tx_outs[self.prev_index].amount
 
     def script_pubkey(self, testnet=False):
-        tx = self.fetch_tx(self.prev_index)
+        tx = self.fetch_tx(self.prev_index, testnet)
         return tx.tx_outs[self.prev_index].script_pubkey
 
     def serialize(self):
@@ -121,18 +124,19 @@ class TxIn:
 
         '''
         prev_tx_hash = s.read(32)[::-1]
-        # print('prev_tx_hash', prev_tx_hash.hex())
+        
+        print('txin: prev_tx_hash', prev_tx_hash.hex())
         # prev_tx_hash = int.from_bytes(prev_tx_hash_bytes, 'little')
         prev_tx_idx = int.from_bytes(s.read(4), 'little')
 
-        # print("previous tx id :", prev_tx_idx)
-        
+        print("txin: previous tx id :", prev_tx_idx)
+        # print(f"{Varint.decode(s)=}")
         script_sig = Script.parse(s)
         # print("Byte stream left: ", len(s.read()))
         # script_sig = Script.parse(s)cr
         # prev_tx_idx = int.from_bytes(prev_tx_idx_bytes, 'little')
-
-        return TxIn(prev_tx=prev_tx_hash, script_sig=script_sig, prev_index=prev_tx_idx)
+        sequence = int.from_bytes(s.read(4), 'little')
+        return TxIn(prev_tx=prev_tx_hash, script_sig=script_sig, sequence=sequence, prev_index=prev_tx_idx)
 
 
 
@@ -158,30 +162,21 @@ class TxOut:
         # TxOut()
         # trying to extract he amount is near imposssible 
         # print("s.read(8) to little int", int.from_bytes(s.read(8), 'little'))
-        amount = int.from_bytes(s.read(8), 'little')        
+        amount = int.from_bytes(s.read(8), 'little') 
+        print(f"txout: {amount=}")      
         # print(f"{amount=}")
         # script_pub_key_len = Varint.decode(s)
         # print(s.read(8).hex())
 
         script_pubkey = Script.parse(s)
-        # script_pub_key = s.read(script_pub_key_len) # , 'little')
-        # print(f"{script_pub_key_len=}")
-        # print(f"{script_pub_key=}")
-        # amount = int.from_bytes(s.read(8), 'little')
         return TxOut(amount=amount, script_pubkey=script_pubkey)
-        # num_outputs = Varint.decode(s) # .read(4), 'little')
-        # print(f"{num_outputs=}")
-        # outputs = [TxOut.parse(s) for _ in range(num_outputs)]
-        # print(f"{num_outputs=}")
-        # print(f"{outputs=}")
-        # return outputs
-
+  
 
 
 
 class Tx:
 
-    def __init__(self, version:int, tx_ins:List[TxIn]=[], tx_outs : List[TxOut]=[], locktime: int =10, testnet: bool =False):
+    def __init__(self,locktime: int, version:int, tx_ins:List[TxIn]=[], tx_outs : List[TxOut]=[] , testnet: bool =False):
         self.version = version
         self.tx_ins = tx_ins
         self.tx_outs = tx_outs
@@ -199,11 +194,11 @@ class Tx:
     
 
     def fee(self):
-        fee = sum([tx_in.amount for tx_in in self.tx_ins]) - sum([tx_out.amount for tx_out in self.tx_outs])
+        fee = sum([tx_in.value(self.testnet) for tx_in in self.tx_ins]) - sum([tx_out.amount for tx_out in self.tx_outs])
         assert fee > 0, "The fee somehow came out as negative, i.e. fee={fee}"
         return fee 
     
-    
+
     def id(self):
         return self.hash().hex()
 
@@ -227,64 +222,25 @@ class Tx:
 
         v_bytes = s.read(4) # first 4 bytes are version bytes 
         version = int.from_bytes(v_bytes, 'little')
-        # print("verison: ", version)
-
+        print(f"tx: {version=}")
         num_inputs = Varint.decode(s)
-        # print("num inputs", num_inputs)
-        inputs =[TxIn.parse(s) for _ in range(num_inputs)]
+        print("tx: num inputs", num_inputs)
+        inputs = []
+        for _ in range(num_inputs):
+            inputs.append(TxIn.parse(s)) #  for _ in range(num_inputs)]
 
-        # next, we have a varint for the script_sig (we dont know how long it is ahead of time) 
-        # scriptsig_len  = Varint.decode(s) + 1
-        # print(f"[tx]: {scriptsig_len=}")
+        # sequence = int.from_bytes(s.read(4), 'little')
+        # print(f"{sequence=}") 
+        # print('tx: supposed to be: ', 4294967295) # 
 
-        # scriptsig = s.read(scriptsig_len)
-
-        # print(f"[tx]: {scriptsig.hex()}")
-
-        # when pass the stream into the above class, its 
-        # is not reading move the pointer along.
-
-
-        # this will be produced by the soon-to-be-defined Script class
-        # until then, hard-coding its value
-        #######################################################################
-        # matched = False
-        # test_hex = ''
-        # while not matched:
-        #     test_hex += s.read(1).hex()
-        #     if test_hex == SCRIPTSIG_HEX:
-        #         break 
-        ##########################################################################
-
-        # sequences = [int.from_bytes(s.read(4), 'little') for _ in range(num_inputs)]
-        # print("After extracting TX in info, ")
-        # print(f"Look for sequence: feffffff")
-        # print("The next 27*4 bytes in hex are:",s.read(27*4).hex() )
-        sequence = int.from_bytes(s.read(4), 'little') 
-                 
-        for i in range(len(inputs)):
-            inputs[i].sequence = sequence
-
-
-        # print(f"What are the next 4 bytes?",sequences )
-        # print(inputs)
-
+        # for i in range(len(inputs)):
+        #     inputs[i].sequence = sequence
 
         num_outputs = Varint.decode(s)
-        outputs = [TxOut.parse(s) for _ in range(num_outputs)]
+        outputs = []
+        for _ in range(num_outputs):
+            outputs.append(TxOut.parse(s)) #   for _ in range(num_outputs)]
         locktime = int.from_bytes(s.read(4), 'little')
-        # print(f"locktime {locktime}")
-        # for (tx_in, seq) in zip(inputs, sequences):
-        #     tx_in.sequence = seq
-
-        # inputs = [tx_in.sequence = seq for (tx_in, seq) in zip(inputs, sequences)]
-        # TxOut.parse(s)
-        # num_outputs = Varint.decode(s)
-        # outputs = TxOut.parse(s)
-        # tx_in  = TxIn.parse(s)
-        # print(f'{version=}')
-        # print(f'{num_inputs=}')
-        # outputs = TxOut.parse(s)
 
 
         return Tx(version=version, tx_outs=outputs, locktime=locktime, tx_ins=inputs, testnet=testnet)

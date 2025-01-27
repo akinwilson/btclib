@@ -21,9 +21,10 @@ tx_hex = (
 
 
 # need to parameterised this for more than just one tx 
-def test_parsing_and_serialization_of_tx(tx_hex):
+def test_parsing_and_serialization_of_tx(tx_hex=tx_hex):
     tx = Tx.parse(BytesIO(bytes.fromhex(tx_hex)))
-    tx.serialize().hex() == tx_hex
+
+    assert tx.serialize().hex() == tx_hex, f"{tx.serialize().hex()} versus {tx_hex}"
 
 
 

@@ -1,10 +1,10 @@
 from btclib.transaction import Tx
+from btclib.utils import Varint
 from io import BytesIO
 from helpers import TxParseVerification
 
-
-
 GREEN='\033[0;32m'
+RED='\033[0;31m'
 RESET='\033[0m'
 
 raw_tx = (
@@ -27,10 +27,11 @@ try:
     result = TxParseVerification(raw_tx, url)()
     NETWORK_CONNECTED =True 
     print("\n\nUsing network connectivity to verify parsing TXs works as expected\n\n")
-    print(f"Using {GREEN + url + RESET} with selenium to acquire tx information\n\n")
+    print(f"Using {GREEN + url + RESET}\n\nwith selenium to acquire tx information\n\n")
 
-except: 
-    pass 
+except:
+    print(f"\n\n {RED}Cannot{RESET} use selenium to verify tx information with third part\n\n{GREEN + url + RESET}\n\nUsing pre-checked values instead")
+    pass
 
 
 
@@ -60,8 +61,11 @@ def test_parsing_outputs_of_transaction():
     expect = 10011545
     assert tx.tx_outs[1].amount == result['outs'][1]['value'] if NETWORK_CONNECTED else expect
     
-    ## inside of Script.serialize(), we preprend the length of the pubkey script to the serialisation of it
-    # the problem is, this a a Varint, hence, to parameterised this, we need to know the length of the pubkey script for every output tx 
-    assert tx.tx_outs[1].script_pubkey.serialize().hex()[2:] == result['outs'][1]['script']['hex'] if NETWORK_CONNECTED else '76a9141c4bc762dd5423e332166702cb75f40df79fea1288ac', f"{tx.tx_outs[1].script_pubkey.serialize().hex()} versus 76a9141c4bc762dd5423e332166702cb75f40df79fea1288ac"
-    assert tx.tx_outs[0].script_pubkey.serialize().hex()[2:] == result['outs'][0]['script']['hex'] if NETWORK_CONNECTED else '76a914bc3b654dca7e56b04dca18f2566cdaf02e8d9ada88ac', f"{tx.tx_outs[0].script_pubkey.serialize().hex()} versus 76a914bc3b654dca7e56b04dca18f2566cdaf02e8d9ada88ac"
+    script_len = Varint.decode(BytesIO(bytes.fromhex(tx.tx_outs[1].script_pubkey.serialize().hex())))
+    tx.tx_outs[1].script_pubkey.serialize()[-script_len:].hex()
+    assert tx.tx_outs[1].script_pubkey.serialize()[-script_len:].hex() == result['outs'][1]['script']['hex'] if NETWORK_CONNECTED else '76a9141c4bc762dd5423e332166702cb75f40df79fea1288ac', f"{tx.tx_outs[1].script_pubkey.serialize().hex()} versus 76a9141c4bc762dd5423e332166702cb75f40df79fea1288ac"
+    
+    script_len = Varint.decode(BytesIO(bytes.fromhex(tx.tx_outs[0].script_pubkey.serialize().hex())))
+    tx.tx_outs[0].script_pubkey.serialize()[-script_len:].hex() 
+    assert tx.tx_outs[0].script_pubkey.serialize()[-script_len:].hex() == result['outs'][0]['script']['hex'] if NETWORK_CONNECTED else '76a914bc3b654dca7e56b04dca18f2566cdaf02e8d9ada88ac', f"{tx.tx_outs[0].script_pubkey.serialize().hex()} versus 76a914bc3b654dca7e56b04dca18f2566cdaf02e8d9ada88ac"
  

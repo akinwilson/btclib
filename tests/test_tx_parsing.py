@@ -20,7 +20,7 @@ raw_tx = (
 
 # testing via
 # https://www.blockchain.com/explorer/assets/btc/decode-transaction
-# with selenium if available
+# with selenium if available (using firefox and geckodriver)
 url = 'https://www.blockchain.com/explorer/assets/btc/decode-transaction'
 NETWORK_CONNECTED = False 
 try: 

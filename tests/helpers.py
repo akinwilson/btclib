@@ -17,9 +17,9 @@ class TxParseVerification:
         self.raw_tx = raw_tx
         self.url = url 
         options = Options()
-        options.add_argument("--headless")  # Runs Chrome in headless mode
+        options.add_argument("--headless")  # Runs Firefox in headless mode
         options.add_argument("--no-sandbox")  # For environments like Docker
-        options.add_argument("--disable-dev-shm-usage")  # To avoid certain ChromeDriver issues
+        options.add_argument("--disable-dev-shm-usage")  # To avoid certain FirefoxDriver issues
         self.driver = webdriver.Firefox(options=options)
 
     def __call__(self,) -> dict: 

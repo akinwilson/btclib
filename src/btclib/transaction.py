@@ -29,12 +29,12 @@ class TxFetcher:
             except ValueError:
                 raise ValueError(f"Unexpected response: {response.text}")
             if raw[4] == 0:
-                print("Hit")
+                # print("Hit")
                 raw = raw[:4] + raw[6:]
                 tx = Tx.parse(BytesIO(raw), testnet=testnet)
                 tx.locktime = int.from_bytes(raw[-4:], "little")
             else:
-                print("Hit else")
+                # print("Hit else")
                 tx = Tx.parse(BytesIO(raw), testnet=testnet)
             if tx.id() != tx_id:
                 raise ValueError(
@@ -125,16 +125,12 @@ class TxIn:
         '''
         prev_tx_hash = s.read(32)[::-1]
         
-        print('txin: prev_tx_hash', prev_tx_hash.hex())
+        # print('txin: prev_tx_hash', prev_tx_hash.hex())
         # prev_tx_hash = int.from_bytes(prev_tx_hash_bytes, 'little')
         prev_tx_idx = int.from_bytes(s.read(4), 'little')
 
-        print("txin: previous tx id :", prev_tx_idx)
-        # print(f"{Varint.decode(s)=}")
+        # print("txin: previous tx id :", prev_tx_idx)
         script_sig = Script.parse(s)
-        # print("Byte stream left: ", len(s.read()))
-        # script_sig = Script.parse(s)cr
-        # prev_tx_idx = int.from_bytes(prev_tx_idx_bytes, 'little')
         sequence = int.from_bytes(s.read(4), 'little')
         return TxIn(prev_tx=prev_tx_hash, script_sig=script_sig, sequence=sequence, prev_index=prev_tx_idx)
 
@@ -163,7 +159,7 @@ class TxOut:
         # trying to extract he amount is near imposssible 
         # print("s.read(8) to little int", int.from_bytes(s.read(8), 'little'))
         amount = int.from_bytes(s.read(8), 'little') 
-        print(f"txout: {amount=}")      
+        # print(f"txout: {amount=}")      
         # print(f"{amount=}")
         # script_pub_key_len = Varint.decode(s)
         # print(s.read(8).hex())
@@ -222,9 +218,9 @@ class Tx:
 
         v_bytes = s.read(4) # first 4 bytes are version bytes 
         version = int.from_bytes(v_bytes, 'little')
-        print(f"tx: {version=}")
+        # print(f"tx: {version=}")
         num_inputs = Varint.decode(s)
-        print("tx: num inputs", num_inputs)
+        # print("tx: num inputs", num_inputs)
         inputs = []
         for _ in range(num_inputs):
             inputs.append(TxIn.parse(s)) #  for _ in range(num_inputs)]

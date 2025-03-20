@@ -2,10 +2,14 @@
 ![Tests](https://github.com/akinwilson/btclib/actions/workflows/tests.yaml/badge.svg)
 
 <img src="img/cowrie.jpg" alt="They used to be used as currency" title="In the majority parts of the world, cowrie shells have historically been used as a form of currency, this has been discovered to be the case in locations such as West Africa, the Americas, Asia, and Australia and other parts of the world. In China, at one point in item, cowries were so important that many characters relating to money or trade contain the character for cowry: 貝."/>
+
+
 ## Overview 
 Implementation of bitcoin library in python allowing for private and public key generation, transaction creation, signing, verification and broadcasting along with a wallet implementation. Project is accompanied with a CLI interface and desktop application. 
 
-Wallets offered by companies like [coinbase](https://www.coinbase.com/en-gb) do not embrace the decentralisation principal that crypto-currencies and their underlying technology promote since coinbase still act like a vanilla custodian bank; i.e they are in control of your funds. btclib promotes this principal of decentralisation by allow you to store the information which controls your coins (private or secret keys) locally on your desktop. 
+Wallets offered by companies like [Coinbase](https://www.coinbase.com/en-gb), do not embrace the  advantages taht decentralisation offer and still act like a [custodian bank](https://en.wikipedia.org/wiki/Custodian_bank); they fundamentally have the ability to control your wealth. The underlying technology blackchain is meant to elementate the need for such custodian entites acting as *caretakers* of your wealth. `btclib` allows you to store the information which controls your wealth (technically controlled via objects called secret or public keys associated to your wallet) locally on your desktop, or possibly, on a removable storage device. 
+
+For information on other organsiations that offer services like fiat-to-crypto-currency exchanging (a service you may believe only companies like Coinbase can offer) **but** that do not act as a custodian entity throughout the exchange process, I recommend reviewing [kycnot.me](https://kycnot.me/about) for alternative options. 
 
 ## Usage 
 For programmatic use 

@@ -3,6 +3,8 @@
 
 <img src="img/cowrie.jpg" alt="They used to be used as currency" title="In the majority parts of the world, cowrie shells have historically been used as a form of currency, this has been discovered to be the case in locations such as West Africa, the Americas, Asia, Australia and other parts of the world. Their value historically in China were so important that many characters relating to money or trade today contain the character for cowry: 貝."/>
 
+To learn more about humanity's use throughout history of [cowry currency](https://en.wikipedia.org/wiki/Shell_money) click the link. 
+
 
 ## Overview 
 Implementation of bitcoin library in python allowing for private and public key generation, transaction creation, signing, verification and broadcasting along with a wallet implementation. Project is accompanied with a CLI interface and desktop application. 

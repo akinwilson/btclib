@@ -1,7 +1,7 @@
 # btclib
 ![Tests](https://github.com/akinwilson/btclib/actions/workflows/tests.yaml/badge.svg)
 
-<img src="img/cowrie.jpg" alt="They used to be used as currency" title="Throughout the majority of the world, cowry shells have historically been used as a form of currency. This has been discovered to be the case in locations such as West Africa, the Americas, Asia, Australia and other parts of the world. Their value historically in China were so important that many characters relating to money or trade today contain the character for cowry: 貝."/>
+<img src="img/cowrie.jpg" alt="They used to be used as currency" title="Throughout the majority of the world, cowry shells have historically been used as a form of currency. This has been discovered to be the case in locations such as West Africa, the Americas, Asia, Australia and other parts of the world. Their value historically in China were so continually important that many characters relating to money or trade today in Mandarin contain the character for cowry: 貝."/>
 
 To learn more about humanity's use throughout history of [cowry currency](https://en.wikipedia.org/wiki/Shell_money) click the link. 
 

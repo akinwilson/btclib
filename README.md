@@ -1,8 +1,7 @@
 # btclib
 ![Tests](https://github.com/akinwilson/btclib/actions/workflows/tests.yaml/badge.svg)
 
-![]( img/cowrie.jpg )
-
+<img src="img/cowrie.jpg" alt="They used to be used as currency" title="In the majority parts of the world, cowrie shells have historically been used as a form of currency, this has been discovered to be the case in locations such as West Africa, the Americas, Asia, and Australia and other parts of the world. In China, at one point in item, cowries were so important that many characters relating to money or trade contain the character for cowry: 貝."/>
 ## Overview 
 Implementation of bitcoin library in python allowing for private and public key generation, transaction creation, signing, verification and broadcasting along with a wallet implementation. Project is accompanied with a CLI interface and desktop application. 
 
